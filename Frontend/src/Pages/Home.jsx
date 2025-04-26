@@ -51,6 +51,7 @@ const Home = () => {
         } catch (error) {
             console.error('Error searching events:', error);
         }
+        setSearchTerm("");
     };
 
     const handleDelete = async (id) => {
