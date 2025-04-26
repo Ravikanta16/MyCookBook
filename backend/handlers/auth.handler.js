@@ -43,5 +43,9 @@ const login =  async (req,res,next) => {
   return res.status(201).json({token,user});
 };
 
+const profile = async(req,res,next) => {
+  return res.status(200).json(req.user);
+}
 
-module.exports = { register, login};
+
+module.exports = { register, login, profile };
