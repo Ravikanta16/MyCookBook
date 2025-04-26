@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "Recipe",
         required: false,
+    }],
+    bookmarkedRecipes: [{
+        type: mongoose.Schema.ObjectId,
+        ref: 'Recipe'
     }]
 });
 

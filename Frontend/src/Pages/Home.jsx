@@ -3,7 +3,6 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { UserDataContext } from '../context/UserContext';
 import { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import { FiSearch } from 'react-icons/fi';
 import { FaTrash } from 'react-icons/fa';
@@ -13,8 +12,7 @@ const Home = () => {
     const {userData,setUserData}=useContext(UserDataContext);
     const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-
-    const navigate=useNavigate()
+    const [bookmarkedRecipes, setBookmarkedRecipes] = useState({});
 
     useEffect(() => {
         fetchRecipes();
@@ -25,11 +23,103 @@ const Home = () => {
     const fetchRecipes = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/`);
+            try {
+                const responsebookmarked=await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/bookmarked`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const bookmarkedObj = {};
+                responsebookmarked.data.forEach(recipe => {
+                    bookmarkedObj[recipe._id] = true;
+                });
+                setBookmarkedRecipes(bookmarkedObj);
+            } catch (error) {
+                console.error("Error fetching recipes:", error);
+            }
             setRecipes(response.data);
         } catch (error) {
             console.error('Error fetching recipes:', error);
         }
     };
+
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/search?search=${searchTerm}`);
+            setRecipes(response.data);
+        } catch (error) {
+            console.error('Error searching events:', error);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`${import.meta.env.VITE_BASE_URL}/recipe/delete`,{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    recipeId: id,
+                }
+            });
+            fetchRecipes();
+        } catch (error) {
+            alert("You are not authorized to delete this recipe");
+            console.error('Error deleting event:', error);
+        }
+    };
+
+    const myBookMarkedRecipes = async () => {
+        try {
+            const response=await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/bookmarked`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const bookmarkedObj = {};
+            response.data.forEach(recipe => {
+                bookmarkedObj[recipe._id] = true;
+            });
+            setBookmarkedRecipes(bookmarkedObj);
+            if(response.data.length === 0){
+                alert("No recipes found in your bookmarks");
+            }
+            setRecipes(response.data);
+        } catch (error) {
+            console.error("Error fetching recipes:", error);
+        }
+    };
+
+    const handleBookmark = async (recipeId) => {
+        const isCurrentlyBookmarked = bookmarkedRecipes[recipeId] || false;
+
+        setBookmarkedRecipes(prev => ({
+            ...prev,
+            [recipeId]: !isCurrentlyBookmarked
+        }));
+
+        if(!isCurrentlyBookmarked){
+            await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/bookmark`, {
+                recipeId: recipeId,
+              
+            },{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        }
+        else{
+            await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/unbookmark`, {
+                recipeId: recipeId,
+               
+            },{
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+        }
+    }
 
     const handleCardClick = (recipe) => {
         setSelectedRecipe(recipe);  
@@ -52,7 +142,7 @@ const Home = () => {
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center">
-                        <button className="text-white font-extrabold text-2xl hover:text-gray-100">Favourites</button>
+                        <button className="text-white font-extrabold text-2xl hover:text-gray-100" onClick={myBookMarkedRecipes}>Favourites</button>
                     </div>
                     <Link to='/CreateRecipe' className="text-white font-extrabold text-2xl hover:text-gray-100">Add Recipe</Link>
                     <div className="flex items-center border-2 rounded-full text-white font-bold text-xl bg-emerald-500 p-1">
@@ -72,6 +162,9 @@ const Home = () => {
                     />
                     <FiSearch size={40}
                         className="text-blue-500 hover:text-black border rounded-lg bg-white cursor-pointer"
+                        onClick={(e)=>{
+                            handleSearch(e)}
+                        }
                     />
                 </div>
 
@@ -98,11 +191,14 @@ const Home = () => {
                     <div className=" flex justify-between mt-2">
                         <button 
                             className="bg-none border-none cursor-pointer p-1"
-                        >
-                            <FaRegBookmark size={20} color="gray" />
+                            onClick={()=>handleBookmark(recipe._id)}>
+                                {bookmarkedRecipes[recipe._id] ? <FaBookmark size={20} color="green" /> : <FaRegBookmark size={20} color="gray" />}
                         </button>
                         <FaTrash size={20}
                             className="text-red-400 hover:text-black cursor-pointer"
+                            onClick={(e) => {
+                                handleDelete(recipe._id)}
+                            } 
                         />
                     </div>
                 </div>

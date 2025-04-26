@@ -25,5 +25,41 @@ const getRecipes = async (req, res) => {
   res.status(200).json(recipes);
 };
 
+const getSearchRecipes = async (req, res) => {
+    const { search } = req.query;
+    const recipes = await recipeModel.find({
+      title: { $regex: search, $options: "i" },
+    });
+    res.status(200).json(recipes);
+}; 
+  
+const deleteRecipe = async (req, res) => {
+    try {
+      const { recipeId } = req.query;
+      const user=req.user;
+      const recipe = await recipeModel.findById(recipeId);
+      if (!user || !recipe) {
+        return res.status(404).json({ message: "user or Recipe not found" });
+      }
+      const createdby = recipe.createdBy;
+      const username=user.username;
+      if (username !== createdby) {
+        return res.status(403).json({ message: "You are not authorized to delete this recipe" });
+      }
+      
+      await recipeModel.findByIdAndDelete(recipeId);
+      if (createdby) {
+        await userModel.findOneAndUpdate(
+          { username: createdby },            
+          { $pull: { recipes: recipeId , bookmarkedRecipes: recipeId}},         
+          { new: true }
+        );
+      }
+      res.status(200).json({ message: "Recipe deleted successfully" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Recipe deletion failed" });
+    }
+};
 
-module.exports = { createRecipes, getRecipes};
+module.exports = { createRecipes, getRecipes, getSearchRecipes, deleteRecipe };
