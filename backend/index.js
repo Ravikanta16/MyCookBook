@@ -5,6 +5,8 @@ const dotenv = require('dotenv')
 dotenv.config();
 const app = express();
 const authRoutes = require("./routes/auth");
+const recipeRoutes = require("./routes/recipe");
+
 const http = require("http");
 const server = http.createServer(app);
 
@@ -23,6 +25,7 @@ app.use(express.json());
 app.use(cookieParser())
 
 app.use("/auth", authRoutes);
+app.use("/recipe", recipeRoutes);
 
 server.listen(3000, () => {
   console.log("Server is running on port 3000");

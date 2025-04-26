@@ -23,7 +23,12 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    recipes: [{
+        type: mongoose.Schema.ObjectId,
+        ref: "Recipe",
+        required: false,
+    }]
 });
 
 userSchema.methods.generateAuthToken = function(){

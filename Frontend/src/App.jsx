@@ -5,6 +5,7 @@ import Home from './Pages/Home';
 import UserLogin from './Pages/userLogin';
 import UserSignUp from './Pages/userSignUp'; 
 import UserProtectedWrapper from './Pages/userProtectedWrapper';
+import CreateRecipe from './Pages/CreateRecipe';
 
 const App = () => {
 
@@ -16,6 +17,11 @@ const App = () => {
       <Route path="/home" element={ 
         <UserProtectedWrapper>
           <Home />
+        </UserProtectedWrapper>
+      } />
+      <Route path="/CreateRecipe" element={
+        <UserProtectedWrapper>
+          <CreateRecipe />
         </UserProtectedWrapper>
       } />
     </Routes>
