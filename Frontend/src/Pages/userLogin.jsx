@@ -5,6 +5,7 @@ import axios from 'axios';
 import { UserDataContext } from '../context/UserContext';
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LoginAPI } from '../Pages/API/MyAPI';
 
 const UserLogin = () => {
     const [userName,setUserName]=useState('')
@@ -20,7 +21,8 @@ const UserLogin = () => {
             password:password
         }
 
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`,UserDetails);
+        // const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`,UserDetails);
+        const response = await LoginAPI(UserDetails);
         if(response.status === 201){
             const data=response.data;
             setUserData(data.user)  

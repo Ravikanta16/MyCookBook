@@ -6,6 +6,7 @@ import { useContext } from 'react';
 import { FaBookmark, FaRegBookmark } from "react-icons/fa";
 import { FiSearch } from 'react-icons/fi';
 import { FaTrash } from 'react-icons/fa';
+import { BookmarkAPI, BookmarkedRecipeAPI, DeleteRecipeAPI, GetRecipeAPI, SearchAPI, UnBookmarkAPI } from '../Pages/API/MyAPI';
 
 const Home = () => {
     const [recipes, setRecipes] = useState([]);
@@ -22,13 +23,15 @@ const Home = () => {
 
     const fetchRecipes = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/`);
+            //const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/`);
+            const response = await GetRecipeAPI();
             try {
-                const responsebookmarked=await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/bookmarked`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                // const responsebookmarked=await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/bookmarked`, {
+                //     headers: {
+                //         Authorization: `Bearer ${token}`,
+                //     },
+                // });
+                const responsebookmarked=await BookmarkedRecipeAPI(token);
                 const bookmarkedObj = {};
                 responsebookmarked.data.forEach(recipe => {
                     bookmarkedObj[recipe._id] = true;
@@ -46,24 +49,26 @@ const Home = () => {
     const handleSearch = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/search?search=${searchTerm}`);
+            // const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/search?search=${searchTerm}`);
+            const response = await SearchAPI(searchTerm);
             setRecipes(response.data);
         } catch (error) {
-            console.error('Error searching events:', error);
+            console.error('Error searching recipe:', error);
         }
         setSearchTerm("");
     };
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${import.meta.env.VITE_BASE_URL}/recipe/delete`,{
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                params: {
-                    recipeId: id,
-                }
-            });
+            // await axios.delete(`${import.meta.env.VITE_BASE_URL}/recipe/delete`,{
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            //     params: {
+            //         recipeId: id,
+            //     }
+            // });
+            await DeleteRecipeAPI(id,token);
             fetchRecipes();
         } catch (error) {
             alert("You are not authorized to delete this recipe");
@@ -73,11 +78,12 @@ const Home = () => {
 
     const myBookMarkedRecipes = async () => {
         try {
-            const response=await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/bookmarked`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            // const response=await axios.get(`${import.meta.env.VITE_BASE_URL}/recipe/bookmarked`, {
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // });
+            const response = await BookmarkedRecipeAPI(token);
             const bookmarkedObj = {};
             response.data.forEach(recipe => {
                 bookmarkedObj[recipe._id] = true;
@@ -101,24 +107,26 @@ const Home = () => {
         }));
 
         if(!isCurrentlyBookmarked){
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/bookmark`, {
-                recipeId: recipeId,
+            // await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/bookmark`, {
+            //     recipeId: recipeId,
               
-            },{
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            // },{
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // });
+            await BookmarkAPI(recipeId,token);
         }
         else{
-            await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/unbookmark`, {
-                recipeId: recipeId,
+            // await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/unbookmark`, {
+            //     recipeId: recipeId,
                
-            },{
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            // },{
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // });
+            await UnBookmarkAPI(recipeId,token);
         }
     }
 
@@ -169,8 +177,8 @@ const Home = () => {
                     />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {recipes.sort((a,b) => new Date(a?.createdAt) - new Date(b?.createdAt) ).map((recipe) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">``
+                {recipes.sort((a,b) => new Date(b?.createdAt) - new Date(a?.createdAt) ).map((recipe) => (
                 <div
                     key={recipe._id}
                     className="border p-4 bg-slate-200 hover:shadow-2xl rounded-lg shadow cursor-pointer"

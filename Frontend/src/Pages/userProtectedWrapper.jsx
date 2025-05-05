@@ -3,6 +3,7 @@ import { useEffect, useState,useContext } from 'react';
 import { UserDataContext } from '../context/UserContext';
 import React from 'react';
 import axios from 'axios';
+import { ProfileAPI } from '../Pages/API/MyAPI';
 
 const UserProtectedWrapper = ({ children }) => {
     const navigate = useNavigate();
@@ -11,11 +12,13 @@ const UserProtectedWrapper = ({ children }) => {
 
     const getUserProfile = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/auth/profile`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            // const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/auth/profile`, {
+            //     headers: {
+            //         Authorization: `Bearer ${token}`,
+            //     },
+            // });
+
+            const response = await ProfileAPI(token);
 
             if (response.status === 200 && response.data) {
                 setUserData(response.data);

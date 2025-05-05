@@ -6,6 +6,7 @@ import { UserDataContext } from '../context/UserContext';
 import { useContext } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { CreateRecipeAPI, fetchData } from '../Pages/API/MyAPI';
 
 const CreateRecipe = () => {
 
@@ -27,7 +28,8 @@ const CreateRecipe = () => {
                 return;
             }
             try {
-                const res = await fetch(`https://forkify-api.herokuapp.com/api/search?q=${recipeName}`);
+                // const res = await fetch(`https://forkify-api.herokuapp.com/api/search?q=${recipeName}`);
+                const res = await fetchData(recipeName);
                 const data = await res.json();
                 if (data.recipes) {
                     setSuggestions(data.recipes.slice(0, 5));
@@ -61,15 +63,16 @@ const CreateRecipe = () => {
             ingredients:ingredients.split(','),
         }
 
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/create`,
-            newRecipe,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
-            }
-        );
+        // const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/recipe/create`,
+        //     newRecipe,
+        //     {
+        //         headers: {
+        //             Authorization: `Bearer ${token}`,
+        //         }
+        //     }
+        // );
 
+        const  response = await CreateRecipeAPI(newRecipe,token);
         if(response.status === 201){
             const data=response.data;  
             console.log("createevent"+ data.token)
